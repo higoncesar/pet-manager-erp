@@ -5,5 +5,10 @@
     "plugin:@typescript-eslint/recommended",
     "prettier" // Add "prettier" last. This will turn off eslint rules conflicting with prettier. This is not what will format our code.
   ],
-  "ignorePatterns": ["src/.next/**/*.js", "src/.next/**/*.json"]
+  "ignorePatterns": ["src/.next/**/*.js", "src/.next/**/*.json"],
+  "rules": {
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "import/no-anonymous-default-export": "off",
+    "react-hooks/exhaustive-deps": "off"
+  }
 }
