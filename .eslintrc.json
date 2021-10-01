@@ -9,6 +9,7 @@
   "rules": {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "import/no-anonymous-default-export": "off",
-    "react-hooks/exhaustive-deps": "off"
+    "react-hooks/exhaustive-deps": "off",
+    "no-explicit-any": "off"
   }
 }
