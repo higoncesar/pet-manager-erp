@@ -22,6 +22,7 @@ const ChartBar: FC<ChartBarProps> = ({ labels, datasets }) => {
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
               x: {
                 stacked: true,
