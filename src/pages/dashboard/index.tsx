@@ -160,6 +160,9 @@ const Home: NextPage = () => {
         spacing={6}
         padding={['0 20px 20px', null, '0 100px 100px']}
       >
+        <Typography variant="h4" component="h2">
+          Dados de atendimentos
+        </Typography>
         <Box
           sx={{
             display: 'grid',
@@ -198,6 +201,9 @@ const Home: NextPage = () => {
             </CardContent>
           </Card>
         </Box>
+        <Typography variant="h4" component="h2">
+          Animais cadastrados
+        </Typography>
         <Box>
           <ModalAnimalHistoric
             open={isMopenModalHistoric}
