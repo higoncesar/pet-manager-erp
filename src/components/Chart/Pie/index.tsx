@@ -1,6 +1,6 @@
 import { Canvas } from './style'
 import ChartJS from 'chart.js/auto'
-import { useEffect, useCallback, useRef, FC } from 'react'
+import { useEffect, useCallback, useRef, FC, memo } from 'react'
 
 interface ChartPieProps {
   labels: string[]
@@ -26,6 +26,7 @@ const ChartPie: FC<ChartPieProps> = ({ data, backgroundColor, labels }) => {
             maintainAspectRatio: false,
             locale: 'pt-BR',
             cutout: 100,
+            animation: { animateRotate: false },
           },
         })
       }
@@ -44,4 +45,4 @@ const ChartPie: FC<ChartPieProps> = ({ data, backgroundColor, labels }) => {
   return <Canvas ref={(elementRef) => instanciateChart(elementRef)} />
 }
 
-export default ChartPie
+export default memo(ChartPie)
