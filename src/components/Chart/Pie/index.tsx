@@ -25,6 +25,7 @@ const ChartPie: FC<ChartPieProps> = ({ data, backgroundColor, labels }) => {
             responsive: true,
             maintainAspectRatio: false,
             locale: 'pt-BR',
+            cutout: 100,
           },
         })
       }
