@@ -1,4 +1,4 @@
-import { useState, FC, ReactNode, useCallback } from 'react'
+import { useState, FC, ReactNode, useCallback, useEffect } from 'react'
 import {
   TableHead,
   TableRow,
@@ -9,8 +9,14 @@ import {
   TableBody,
   TablePagination,
   Typography,
+  OutlinedInput,
+  InputAdornment,
+  Box,
+  Stack,
+  Card,
 } from '@material-ui/core'
 import { format } from 'date-fns'
+import { FaSearch } from 'react-icons/fa'
 
 type HeaderItem = {
   cell: string | ReactNode
@@ -47,94 +53,127 @@ const TableLazy: FC<TableLazyProps> = ({
   const [page, setPage] = useState(0)
   const [order, setOrder] = useState<Order>('desc')
   const [orderBy, setOrderBy] = useState(header[0].key)
+  const [filterData, setFilterData] = useState<any[]>([])
 
-  const renderBodyTable = useCallback(() => {
-    if (!data.length) {
-      return (
-        <TableRow>
-          <TableCell colSpan={header.length}>
-            <Typography variant="h6" component="div" textAlign="center">
-              {emptyContent}
-            </Typography>
-          </TableCell>
-        </TableRow>
-      )
-    }
+  useEffect(() => {
+    setFilterData(data)
+  }, [data])
 
-    return data
-      .sort((a, b) => {
-        return order === 'asc'
-          ? descendingComparator(a, b, orderBy)
-          : -descendingComparator(a, b, orderBy)
+  const handleSearch = useCallback(
+    (event) => {
+      const value = event.target.value.toLowerCase()
+      const filter = data.filter((bodyRow) => {
+        const bodyRowArray = Object.entries(bodyRow)
+        const validColuns = bodyRowArray.filter(([key]) =>
+          header.find((headerItem) => headerItem.key === key.toString())
+        )
+        return validColuns.find(([, column]) =>
+          column.toString().toLowerCase().includes(value)
+        )
       })
-      .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
-      .map((row, index) => (
-        <TableRow hover key={index}>
-          {header.map(({ key, isDate }, index) => (
-            <TableCell key={index}>
-              {isDate ? format(new Date(row[key]), 'dd/MM/yyyy') : row[key]}
-            </TableCell>
-          ))}
-
-          {customColunm?.map(({ cell }, index) => (
-            <TableCell key={index}>{cell(row)}</TableCell>
-          ))}
-        </TableRow>
-      ))
-  }, [data, header, customColunm])
+      setFilterData(filter)
+    },
+    [data, filterData, header]
+  )
 
   return (
-    <>
-      <TableContainer>
-        <Table
-          sx={{ minWidth: 750 }}
-          aria-labelledby="tableTitle"
-          size={'medium'}
-        >
-          <TableHead>
-            <TableRow>
-              {header.map((item, index) => (
-                <TableCell key={index}>
-                  <TableSortLabel
-                    active={orderBy === item.key}
-                    direction={order}
-                    onClick={() => {
-                      setOrderBy(item.key)
-                      setOrder((old) => (old === 'asc' ? 'desc' : 'asc'))
-                      setPage(0)
-                    }}
-                  >
-                    {item.cell}
-                  </TableSortLabel>
-                </TableCell>
-              ))}
-              {customColunm?.map((column, index) => (
-                <TableCell key={index}>{column.header.cell}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>{renderBodyTable()}</TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={data.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={(_, page) => {
-          setPage(page)
-        }}
-        onRowsPerPageChange={(value) => {
-          setRowPerPages(Number(value.target.value))
-          setPage(0)
-        }}
-        labelRowsPerPage="Item por página"
-        labelDisplayedRows={(pageInfo) =>
-          `${pageInfo.from}-${pageInfo.to} de ${pageInfo.count}`
-        }
-      />
-    </>
+    <Stack spacing={4}>
+      <Box>
+        <OutlinedInput
+          onChange={handleSearch}
+          placeholder="Buscar"
+          endAdornment={
+            <InputAdornment position="start">
+              <FaSearch />
+            </InputAdornment>
+          }
+        />
+      </Box>
+      <Card>
+        <TableContainer>
+          <Table
+            sx={{ minWidth: 750 }}
+            aria-labelledby="tableTitle"
+            size={'medium'}
+          >
+            <TableHead>
+              <TableRow>
+                {header.map((item, index) => (
+                  <TableCell key={index}>
+                    <TableSortLabel
+                      active={orderBy === item.key}
+                      direction={order}
+                      onClick={() => {
+                        setOrderBy(item.key)
+                        setOrder((old) => (old === 'asc' ? 'desc' : 'asc'))
+                        setPage(0)
+                      }}
+                    >
+                      {item.cell}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
+                {customColunm?.map((column, index) => (
+                  <TableCell key={index}>{column.header.cell}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filterData.length ? (
+                filterData
+                  .sort((a, b) => {
+                    return order === 'asc'
+                      ? descendingComparator(a, b, orderBy)
+                      : -descendingComparator(a, b, orderBy)
+                  })
+                  .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+                  .map((row, index) => (
+                    <TableRow hover key={index}>
+                      {header.map(({ key, isDate }, index) => (
+                        <TableCell key={index}>
+                          {isDate
+                            ? format(new Date(row[key]), 'dd/MM/yyyy')
+                            : row[key]}
+                        </TableCell>
+                      ))}
+
+                      {customColunm?.map(({ cell }, index) => (
+                        <TableCell key={index}>{cell(row)}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={header.length}>
+                    <Typography variant="h6" component="div" textAlign="center">
+                      {emptyContent}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filterData.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(_, page) => {
+            setPage(page)
+          }}
+          onRowsPerPageChange={(value) => {
+            setRowPerPages(Number(value.target.value))
+            setPage(0)
+          }}
+          labelRowsPerPage="Item por página"
+          labelDisplayedRows={(pageInfo) =>
+            `${pageInfo.from}-${pageInfo.to} de ${pageInfo.count}`
+          }
+        />
+      </Card>
+    </Stack>
   )
 }
 
