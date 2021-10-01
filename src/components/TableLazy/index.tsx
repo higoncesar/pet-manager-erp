@@ -1,4 +1,4 @@
-import { useState, FC, ReactNode } from 'react'
+import { useState, FC, ReactNode, useCallback } from 'react'
 import {
   TableHead,
   TableRow,
@@ -8,6 +8,7 @@ import {
   Table,
   TableBody,
   TablePagination,
+  Typography,
 } from '@material-ui/core'
 import { format } from 'date-fns'
 
@@ -20,6 +21,8 @@ type HeaderItem = {
 type TableLazyProps = {
   data: any[]
   header: HeaderItem[]
+  customColunm?: any[]
+  emptyContent?: ReactNode
 }
 
 type Order = 'asc' | 'desc'
@@ -34,11 +37,51 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0
 }
 
-const TableLazy: FC<TableLazyProps> = ({ data, header }) => {
+const TableLazy: FC<TableLazyProps> = ({
+  data = [],
+  header,
+  customColunm,
+  emptyContent = 'Não há dados para mostrar',
+}) => {
   const [rowsPerPage, setRowPerPages] = useState(10)
   const [page, setPage] = useState(0)
   const [order, setOrder] = useState<Order>('desc')
   const [orderBy, setOrderBy] = useState(header[0].key)
+
+  const renderBodyTable = useCallback(() => {
+    if (!data.length) {
+      return (
+        <TableRow>
+          <TableCell colSpan={header.length}>
+            <Typography variant="h6" component="div" textAlign="center">
+              {emptyContent}
+            </Typography>
+          </TableCell>
+        </TableRow>
+      )
+    }
+
+    return data
+      .sort((a, b) => {
+        return order === 'asc'
+          ? descendingComparator(a, b, orderBy)
+          : -descendingComparator(a, b, orderBy)
+      })
+      .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+      .map((row, index) => (
+        <TableRow hover key={index}>
+          {header.map(({ key, isDate }, index) => (
+            <TableCell key={index}>
+              {isDate ? format(new Date(row[key]), 'dd/MM/yyyy') : row[key]}
+            </TableCell>
+          ))}
+
+          {customColunm?.map(({ cell }, index) => (
+            <TableCell key={index}>{cell(row)}</TableCell>
+          ))}
+        </TableRow>
+      ))
+  }, [data, header, customColunm])
 
   return (
     <>
@@ -65,28 +108,12 @@ const TableLazy: FC<TableLazyProps> = ({ data, header }) => {
                   </TableSortLabel>
                 </TableCell>
               ))}
+              {customColunm?.map((column, index) => (
+                <TableCell key={index}>{column.header.cell}</TableCell>
+              ))}
             </TableRow>
           </TableHead>
-          <TableBody>
-            {data
-              .sort((a, b) => {
-                return order === 'asc'
-                  ? descendingComparator(a, b, orderBy)
-                  : -descendingComparator(a, b, orderBy)
-              })
-              .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
-              .map((row, index) => (
-                <TableRow hover key={index}>
-                  {header.map(({ key, isDate }, index) => (
-                    <TableCell key={index}>
-                      {isDate
-                        ? format(new Date(row[key]), 'dd/MM/yyyy')
-                        : row[key]}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-          </TableBody>
+          <TableBody>{renderBodyTable()}</TableBody>
         </Table>
       </TableContainer>
       <TablePagination
@@ -103,10 +130,9 @@ const TableLazy: FC<TableLazyProps> = ({ data, header }) => {
           setPage(0)
         }}
         labelRowsPerPage="Item por página"
-        labelDisplayedRows={(pageInfo) => {
-          console.log({ pageInfo })
-          return `${pageInfo.from}-${pageInfo.to} de ${pageInfo.count}`
-        }}
+        labelDisplayedRows={(pageInfo) =>
+          `${pageInfo.from}-${pageInfo.to} de ${pageInfo.count}`
+        }
       />
     </>
   )
