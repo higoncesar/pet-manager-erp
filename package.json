@@ -6,7 +6,7 @@
     "dev": "next dev ./src",
     "build": "next build ./src",
     "start": "next start ./src",
-    "lint": "next lint ./src",
+    "lint": "next lint",
     "commit": "cz",
     "test": "jest --watch"
   },
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^12.1.1",
+    "@testing-library/react": "^12.1.2",
     "@types/react": "17.0.24",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
     "babel-jest": "^27.2.4",
@@ -33,6 +33,7 @@
     "eslint": "7.32.0",
     "eslint-config-next": "11.1.2",
     "eslint-config-prettier": "^8.3.0",
+    "est": "^0.2.1-alpha",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.2.4",
     "prettier": "^2.4.1",
