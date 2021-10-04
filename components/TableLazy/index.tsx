@@ -1,3 +1,4 @@
+import SearchInput from '@/components/SearchInput'
 import { useState, FC, ReactNode, useCallback, useEffect } from 'react'
 import {
   TableHead,
@@ -9,14 +10,10 @@ import {
   TableBody,
   TablePagination,
   Typography,
-  OutlinedInput,
-  InputAdornment,
-  Box,
   Stack,
   Card,
 } from '@material-ui/core'
 import { format } from 'date-fns'
-import { FaSearch } from 'react-icons/fa'
 
 type HeaderItem = {
   cell: string | ReactNode
@@ -29,6 +26,7 @@ type TableLazyProps = {
   header: HeaderItem[]
   customColunm?: any[]
   emptyContent?: ReactNode
+  isSearchable?: boolean
 }
 
 type Order = 'asc' | 'desc'
@@ -48,8 +46,9 @@ const TableLazy: FC<TableLazyProps> = ({
   header,
   customColunm,
   emptyContent = 'Não há dados para mostrar',
+  isSearchable = true,
 }) => {
-  const [rowsPerPage, setRowPerPages] = useState(10)
+  const [rowsPerPage, setRowPerPages] = useState(5)
   const [page, setPage] = useState(0)
   const [order, setOrder] = useState<Order>('desc')
   const [orderBy, setOrderBy] = useState(header[0].key)
@@ -59,42 +58,45 @@ const TableLazy: FC<TableLazyProps> = ({
     setFilterData(data)
   }, [data])
 
+  const formatDate = useCallback(
+    (date: string) => {
+      return format(new Date(date), 'dd/MM/yyyy')
+    },
+    [format]
+  )
+
   const handleSearch = useCallback(
     (event) => {
-      const value = event.target.value.toLowerCase()
+      const text = event.target.value.toLowerCase()
       const filter = data.filter((bodyRow) => {
-        const bodyRowArray = Object.entries(bodyRow)
+        const bodyRowArray = Object.entries(bodyRow) as Array<[string, string]>
         const validColuns = bodyRowArray.filter(([key]) =>
           header.find((headerItem) => headerItem.key === key.toString())
         )
-        return validColuns.find((value: any) =>
-          value.column.toString().toLowerCase().includes(value)
-        )
+
+        return validColuns.find(([column, value]) => {
+          const headerColumn = header.find((item) => item.key === column)
+          if (headerColumn?.isDate) {
+            return formatDate(value).toLowerCase().includes(text)
+          }
+          return value.toString().toLowerCase().includes(text)
+        })
       })
       setFilterData(filter)
     },
-    [data, filterData, header]
+    [data, filterData, header, formatDate]
   )
 
   return (
     <Stack spacing={4}>
-      <Box>
-        <OutlinedInput
-          onChange={handleSearch}
-          placeholder="Buscar"
-          endAdornment={
-            <InputAdornment position="start">
-              <FaSearch />
-            </InputAdornment>
-          }
-        />
-      </Box>
+      {isSearchable && <SearchInput handleSearch={handleSearch} />}
       <Card>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
             aria-labelledby="tableTitle"
             size={'medium'}
+            role="table"
           >
             <TableHead>
               <TableRow>
@@ -118,7 +120,7 @@ const TableLazy: FC<TableLazyProps> = ({
                 ))}
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody data-testid="tbody">
               {filterData.length ? (
                 filterData
                   .sort((a, b) => {
@@ -131,9 +133,7 @@ const TableLazy: FC<TableLazyProps> = ({
                     <TableRow hover key={index}>
                       {header.map(({ key, isDate }, index) => (
                         <TableCell key={index}>
-                          {isDate
-                            ? format(new Date(row[key]), 'dd/MM/yyyy')
-                            : row[key]}
+                          {isDate ? formatDate(row[key]) : row[key]}
                         </TableCell>
                       ))}
 
@@ -155,6 +155,7 @@ const TableLazy: FC<TableLazyProps> = ({
           </Table>
         </TableContainer>
         <TablePagination
+          data-testid="pagination"
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={filterData.length}
@@ -171,6 +172,7 @@ const TableLazy: FC<TableLazyProps> = ({
           labelDisplayedRows={(pageInfo) =>
             `${pageInfo.from}-${pageInfo.to} de ${pageInfo.count}`
           }
+          SelectProps={{ role: 'listbox' }}
         />
       </Card>
     </Stack>

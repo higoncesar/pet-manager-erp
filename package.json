@@ -10,7 +10,8 @@
     "commit": "cz",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:coverage:server": "jest --coverage && cd coverage/lcov-report && npx http-server"
   },
   "dependencies": {
     "@emotion/react": "^11.4.1",
