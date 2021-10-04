@@ -67,8 +67,8 @@ const TableLazy: FC<TableLazyProps> = ({
         const validColuns = bodyRowArray.filter(([key]) =>
           header.find((headerItem) => headerItem.key === key.toString())
         )
-        return validColuns.find(([, column]) =>
-          column.toString().toLowerCase().includes(value)
+        return validColuns.find((value: any) =>
+          value.column.toString().toLowerCase().includes(value)
         )
       })
       setFilterData(filter)

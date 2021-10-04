@@ -1,9 +1,10 @@
 import api from '@/config/api'
 
 export interface AnimalResponse {
+  [x: string]: any
   id: number
   name: string
-  animal_type: string
+  animal_type: 'DOG' | 'CAT' | ' FISH' | 'SNAKE' | 'TIGER' | ' OTHER'
   birth: string
   owner: string
 }

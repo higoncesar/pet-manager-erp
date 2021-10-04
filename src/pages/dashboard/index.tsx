@@ -46,7 +46,16 @@ const Home: NextPage = () => {
 
   const chartTypeCare = useMemo(() => {
     const datasetsObject = appointmentList.reduce(
-      (acc, appointment) => {
+      (
+        acc: {
+          [key: string]: {
+            label: string
+            data: number[]
+            backgroundColor: string
+          }
+        },
+        appointment
+      ) => {
         const date = new Date(appointment.created_at)
         const dayOfTheWeek = getDay(date)
         acc[appointment.type].data[dayOfTheWeek] =
@@ -76,6 +85,7 @@ const Home: NextPage = () => {
         },
       }
     )
+
     return Object.keys(datasetsObject).map((i) => datasetsObject[i])
   }, [appointmentList])
 
@@ -84,14 +94,18 @@ const Home: NextPage = () => {
       return { labels: [], data: [] }
     }
     const objectQuantityTypes = appointmentList.reduce(
-      (cc, appointment) => {
+      (
+        cc: { [key: string]: { label: string; quantity: number } },
+        appointment
+      ) => {
         const animal = animalList.find(
           (animal) => animal.id === appointment.animal_id
         )
-        if (cc[animal?.animal_type]) {
-          cc[animal?.animal_type].quantity =
-            cc[animal?.animal_type].quantity + 1
+
+        if (!animal) {
+          return cc
         }
+        cc[animal.animal_type].quantity = cc[animal.animal_type].quantity + 1
         return cc
       },
       {
@@ -104,7 +118,7 @@ const Home: NextPage = () => {
       }
     )
     return Object.values(objectQuantityTypes).reduce(
-      (cc, data) => {
+      (cc: { labels: string[]; data: number[] }, data) => {
         cc.labels.push(data.label)
         cc.data.push(data.quantity)
         return cc
