@@ -8,7 +8,8 @@
     "start": "next start ./src",
     "lint": "next lint",
     "commit": "cz",
-    "test": "jest --watch"
+    "test": "jest",
+    "test:watch": "jest --watchAll"
   },
   "dependencies": {
     "@emotion/react": "^11.4.1",
