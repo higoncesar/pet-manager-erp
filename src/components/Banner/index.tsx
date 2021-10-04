@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import DogBanner from '@/assets/images/dog-banner.png'
 import { Box, Typography } from '@material-ui/core'
 
 const Banner = () => {
@@ -12,9 +11,15 @@ const Banner = () => {
         alignItems: 'center',
         padding: [5, 5, 0],
       }}
+      data-testid="banner"
     >
       <Box sx={{ display: ['none', 'none', 'flex'] }}>
-        <Image src={DogBanner} alt="dog glasses" />
+        <Image
+          src="/images/dog-banner.png"
+          alt="dog glasses"
+          width={300}
+          height={300}
+        />
       </Box>
       <Box>
         <Typography variant="banner" component="h2">
