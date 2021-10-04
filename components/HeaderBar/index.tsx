@@ -9,7 +9,7 @@ interface HeaderBarProps {
 
 export default function HeaderBar({ buttonMenuClick, title }: HeaderBarProps) {
   return (
-    <AppBar position="static">
+    <AppBar position="static" data-testid="header-bar">
       <Toolbar variant="regular">
         <IconButton
           edge="start"
