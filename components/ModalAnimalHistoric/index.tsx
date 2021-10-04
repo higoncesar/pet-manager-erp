@@ -11,10 +11,27 @@ import {
 import { FC } from 'react'
 import { FaDog, FaUser } from 'react-icons/fa'
 
+type Appointment = {
+  animal_id: number
+  created_at: string
+  details: string
+  id: number
+  type: string
+}
+
+type Animal = {
+  animal_type: string
+  birth: string
+  id: number
+  name: string
+  owner: string
+  appointments: Appointment[]
+}
+
 type ModalAnimalHistoricProps = {
   open: boolean
   onClose: () => void
-  animal: any
+  animal: Animal
 }
 
 const ModalAnimalHistoric: FC<ModalAnimalHistoricProps> = ({
@@ -23,7 +40,7 @@ const ModalAnimalHistoric: FC<ModalAnimalHistoricProps> = ({
   animal,
 }) => {
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} data-testid="modal-animal-historic">
       <Box
         sx={{
           position: 'absolute',
